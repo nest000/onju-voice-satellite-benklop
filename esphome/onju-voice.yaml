@@ -201,9 +201,14 @@ esp_audio_stack:
   buffers_in_psram: true
   # NOTE: upstream v2026.9.x always tears down I2S DMA when the last mic
   # consumer leaves (no idle_teardown option). VA drops the mic between STT
-  # and MWW, so the 768-frame DMA is recreated each turn — verify no
-  # ESP_ERR_NO_MEM on the VA -> MWW mic restart (the fork's idle_teardown:
-  # false used to prevent this).
+  # and MWW, so the ~34 KB DMA pair is freed/re-allocated each turn. On this
+  # board that churn fragments internal RAM: MWW start loops on
+  # ESP_ERR_NO_MEM and a later bad_alloc aborted in
+  # VoiceAssistant::get_configuration. The two *_in_psram knobs below are a
+  # stopgap to claw back ~12 KB internal until the idle_dma_alloc opt-out
+  # lands upstream.
+  audio_task_stack_in_psram: true  # ~8 KB internal recovered
+  aec_ref_ring_in_psram: true  # ~4 KB internal recovered (120 ms @ 16 kHz)
   processor_id: afe_processor
   aec_reference: ring_buffer
   aec_reference_buffer_ms: 120
