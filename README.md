@@ -8,7 +8,7 @@ This repository is a maintenance fork of [tetele/onju-voice-satellite](https://g
 
 | Now | Next |
 |-----|------|
-| Dual-mic AFE + I2S keep-alive on the shared bus | Loud-music barge-in / VAD / AGC — software AFE is not XMOS |
+| Dual-mic AFE + I2S keep-alive on the shared bus; native Sendspin playback | Loud-music barge-in / VAD / AGC — software AFE is not XMOS |
 
 One `esp_audio_stack` owns the shared I2S bus so both SPH0645s and the amp run together. ESP-SR dual-mic AFE (`mic_num: 2`, Speech Enhancement) feeds wake word and Assist. Loud music can still mask the wake word — tap the center pad if it misses. Overlay `rx_mic_slots: [right, left]` if BSS sounds inverted.
 
@@ -18,7 +18,8 @@ Guides for alarms, wake words, music, and touch controls: **[User Manual](MANUAL
 
 - Onju Voice PCB installed in a Google Nest Mini (2nd gen)
 - Home Assistant 2024.7.0 or newer, with a voice assistant pipeline (STT + TTS)
-- ESPHome **2026.5.0** or newer
+- ESPHome **2026.10.0** or newer
+- Music Assistant **2.11.0b4+** for Sendspin (optional; regular HA media still works)
 - First flash over USB (BOOT button held). Later updates are OTA.
 
 If you are upgrading from tetele's Arduino-based config, OTA will likely fail because the framework is now ESP-IDF. USB flash once, OTA after that.
