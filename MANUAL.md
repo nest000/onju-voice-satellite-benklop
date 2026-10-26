@@ -262,7 +262,19 @@ The `Timer Status` text sensor reports:
 
 ## Music Streaming
 
-The Onju Voice appears as a standard Home Assistant media player. You can stream audio to it from any HA integration that supports media players — Music Assistant, Spotify, TTS, media browser, etc.
+The Onju Voice accepts regular Home Assistant media and TTS. It also advertises a native **Sendspin** endpoint for synchronized multi-room playback.
+
+### Sendspin
+
+Sendspin playback is enabled in the firmware. It needs a Sendspin 1.0.0-rc1 server, such as **Music Assistant 2.11.0b4 or newer**; older servers cannot connect. mDNS must work and TCP port **8928** must be reachable between the Onju Voice and the server.
+
+1. Put the Music Assistant server and the Onju Voice on the same network.
+2. Let Music Assistant discover the Sendspin player, then select it as a playback target.
+3. Group it with other Sendspin players in Music Assistant for synchronized audio.
+
+Sendspin audio uses the media pipeline. Home Assistant TTS uses the separate announcement pipeline; regular HTTP media also uses the media pipeline.
+
+By default any Sendspin server on the LAN may play on the device. For stricter access, set `unpaired_access: false` and configure a static or dynamic pairing code in the `sendspin:` block.
 
 ### Duplex playback
 

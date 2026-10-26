@@ -20,10 +20,10 @@ esphome:
   name: ${name}
   name_add_mac_suffix: true
   friendly_name: ${friendly_name}
-  min_version: 2026.9.0  # esphome-audio-stack v2026.10.x targets ESPHome 2026.9+
+  min_version: 2026.10.0  # Sendspin requires ESPHome 2026.10+
   project:
     name: benklop.onju_voice_satellite
-    version: "2.3.0"
+    version: "2.4.0"
   platformio_options:
     board_build.flash_mode: dio
     board_build.arduino.memory_type: qio_opi
@@ -257,11 +257,38 @@ speaker:
     bits_per_sample: 16
     num_channels: 1
 
+# --- Sendspin ---
+# Native multi-room playback. Needs a Sendspin 1.0.0-rc1 server (Music
+# Assistant 2.11.0b4+) and mDNS + TCP 8928 reachable. Sendspin and regular
+# HTTP media share the media pipeline; TTS uses the announcement pipeline.
+
+sendspin:
+  id: sendspin_hub
+  task_stack_in_psram: true
+
+media_source:
+  - platform: sendspin
+    id: sendspin_media_source
+    sendspin_id: sendspin_hub
+    task_stack_in_psram: true
+    buffer_size: 1000000
+
+  # Separate instances: a source can only belong to one pipeline.
+  - platform: audio_http
+    id: media_http_source
+    task_stack_in_psram: true
+    buffer_size: 50000
+    persistent_ring_buffer: true
+  - platform: audio_http
+    id: announcement_http_source
+    task_stack_in_psram: true
+    buffer_size: 50000
+    persistent_ring_buffer: true
+
 media_player:
-  - platform: speaker
+  - platform: speaker_source
     name: None
     id: onju_media_player
-    task_stack_in_psram: true
     volume_increment: 0.05
     volume_min: 0.0
     volume_max: 1.0
@@ -270,11 +297,16 @@ media_player:
       format: FLAC
       sample_rate: 48000
       num_channels: 1
+      sources:
+        - announcement_http_source
     media_pipeline:
       speaker: media_speaker
       format: FLAC
       sample_rate: 48000
       num_channels: 1
+      sources:
+        - sendspin_media_source
+        - media_http_source
     on_announcement:
       - lambda: id(va_active) = false;
       - script.execute: reset_led
